@@ -1,0 +1,1 @@
+# arduino-sdct-configuration-script
