@@ -16,21 +16,7 @@ import (
 var Parameters = make(map[string]int)
 
 func confManager() {
-	info, err := os.Stat("../configuration.csv")
-	if err != nil {
-		//If error do everything
-	} else {
-		fmt.Println(info)
-		//time_from_last_configuration := time.Nanosecond - info.Atime_ns
-		// It it's passed more than an hour from the last refresh configuration
-		//if time_from_last_configuration > 3600000 {
-		//refreshConf()
-		//}
-	}
-}
 
-// Take parameters from file and refresh configuration
-func refreshConf() {
 	// Read parameters from configuration file
 	csvfile, err := os.Open("../configuration.csv")
 	if err != nil {
@@ -52,7 +38,23 @@ func refreshConf() {
 	}
 
 	things := getThings()
-	//log.Printf("Response from arduino, %v", things)
+	count := 0
+	for _, thing := range things {
+		if strings.HasPrefix(thing.Name, "Contact-tracing-GW") {
+			count++
+		}
+	}
+
+	//Create every the number of thing specified in the file
+	to_be_created := Parameters["THINGS_TO_BE_CREATED"] - count
+	if to_be_created > 0 {
+		for i := 1; i == to_be_created; i++ {
+			thing := createThing("Contact-tracing-GW-" + strconv.Itoa(count+i))
+			//Add the new thing to the things array
+			things = append(things, thing)
+		}
+	}
+
 	for i, thing := range things {
 		if strings.HasPrefix(thing.Name, "Contact-tracing") {
 			fmt.Println(i, thing.Id)
@@ -123,6 +125,23 @@ func createProperty(thingid string, name string) iot.ArduinoProperty {
 		log.Printf("Error creating the property, %v", err)
 	}
 	return property
+
+}
+
+func createThing(name string) iot.ArduinoThing {
+	// Create an instance of the iot-api Go client, we pass an empty config
+	// because defaults are ok
+	client := iot.NewAPIClient(iot.NewConfiguration())
+
+	var t iot.CreateThingsV2Payload
+	t.Name = name
+
+	// Get the list of things for the current user
+	thing, _, err := client.ThingsV2Api.ThingsV2Create(ctx, t, nil)
+	if err != nil {
+		log.Printf("Error creating the thing, %v", err)
+	}
+	return thing
 
 }
 
