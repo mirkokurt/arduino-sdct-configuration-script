@@ -4,20 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"runtime"
 )
 
 func main() {
 
 	// Channel to signal errors
 	alarm := make(chan struct{})
-
-	envFlag := runtime.GOMAXPROCS(runtime.NumCPU())
-	if envFlag > -1 {
-		fmt.Println("GOMAXPROCS =", runtime.NumCPU())
-	} else {
-		fmt.Println("GOMAXPROCS is default!")
-	}
 
 	argClientID := flag.String("client_id", "", "Arduino IoT Cloud clientID")
 	argClientSecret := flag.String("client_secret", "", "Arduino IoT Cloud client secret")

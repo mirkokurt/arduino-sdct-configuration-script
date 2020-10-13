@@ -59,6 +59,11 @@ func confManager() {
 		if strings.HasPrefix(thing.Name, "Contact-tracing") {
 			fmt.Println(i, thing.Id)
 			properties := getProperties(thing.Id)
+
+			//Create a property to handle contacts
+			findOrCreate("Contacts", thing.Id, properties)
+
+			//Create a list of properties to handle parameters
 			for k, v := range Parameters {
 				if strings.HasSuffix(k, "_PARAM") {
 					property := findOrCreate(k, thing.Id, properties)
